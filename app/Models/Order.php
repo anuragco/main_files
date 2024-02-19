@@ -9,6 +9,23 @@ class Order extends Model
 {
     use HasFactory;
 
+    
+// Order.php
+
+// Order.php
+
+// In the Order model
+protected $fillable = ['order_status', 'payment_status'];
+
+// In the Product model
+
+
+public function products()
+{
+    return $this->hasManyThrough(Product::class, OrderItem::class, 'order_id', 'id', 'id', 'product_id');
+}
+
+
 
     public function client(){
         return $this->belongsTo(User::class,'client_id')->select('id','name','email','image','phone','address');
@@ -25,9 +42,10 @@ class Order extends Model
         return $this->belongsTo(User::class,'user_id');
     }
 
-    public function orderItems(){
-        return $this->hasMany(OrderItem::class);
-    }
+    public function orderItems()
+{
+    return $this->hasMany(OrderItem::class, 'order_id');
+}
 
     public function refundRequest(){
         return $this->hasOne(RefundRequest::class);

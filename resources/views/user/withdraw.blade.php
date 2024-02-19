@@ -179,26 +179,59 @@
 @endsection
 @push('frontend_js')
 <script>
-    (function($) {
-    "use strict";
-    $(document).ready(function () {
-        $("#method_id").on('change', function(){
-            var methodId = $(this).val();
-            $.ajax({
-                type:"get",
-                url:"{{url('/get-withdraw-account-info/')}}"+"/"+methodId,
-                success:function(response){
-                   $("#method_des_box").html(response);
-                },
-                error:function(err){}
-            })
+  $(document).ready(function () {
+    $("#method_id").on('change', function(){
+      var selectedMethod = $(this).find("option:selected").text();
+      console.log('Selected Payment Method:', selectedMethod);
 
-            if(!methodId){
-                $("#method_des").addClass('d-none')
-            }
+      // The rest of your code...
+      var methodId = $(this).val();
+      $.ajax({
+        type: "get",
+        url: "{{ url('/get-withdraw-account-info/') }}" + "/" + methodId,
+        success: function (response) {
+          $("#method_des_box").html(response);
+        },
+        error: function (err) {
+          console.error('Error fetching account info:', err);
+        }
+      });
 
-        });
+      if (!methodId) {
+        $("#method_des").addClass('d-none');
+      }
+
+      updateLegendText(selectedMethod);
     });
-})(jQuery);
+
+    document.getElementById('method_id').addEventListener('change', function () {
+      var selectedValue = this.value;
+      console.log('Selected value:', selectedValue);
+      updateLegendText(selectedValue);
+    });
+
+    function updateLegendText(selectedValue) {
+  selectedValue = selectedValue.trim(); // Trim leading and trailing whitespaces
+
+  console.log('Updating legend text for:', selectedValue);
+  var accountDetailsLegend = document.getElementById('accountDetailsLegend');
+  var accountInfoTextarea = document.getElementById('account_info');
+
+  if (selectedValue.toLowerCase() === 'paypal') {
+    
+    accountDetailsLegend.innerText = 'Enter Your PayPal Email*';
+    accountInfoTextarea.placeholder = 'Enter Your PayPal Email*';
+  } else if (selectedValue.toLowerCase() === 'crypto') {
+    
+    accountDetailsLegend.innerText = 'Enter Your Crypto Address*';
+    accountInfoTextarea.placeholder = 'Enter Your Crypto Address*';
+  } else {
+    
+    accountDetailsLegend.innerText = 'Enter Your Account Details*';
+    accountInfoTextarea.placeholder = 'Enter Your Account Details*';
+  }
+}
+
+  });
 </script>
 @endpush

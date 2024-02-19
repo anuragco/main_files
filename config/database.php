@@ -95,6 +95,28 @@ return [
 
     ],
 
+    'options'   => [
+        PDO::ATTR_EMULATE_PREPARES => true,
+        PDO::ATTR_STRINGIFY_FETCHES => false,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+        PDO::ATTR_PERSISTENT => true,
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci',
+        PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        PDO::ATTR_AUTOCOMMIT => 1,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+        PDO::ATTR_PERSISTENT => true,
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        PDO::ATTR_AUTOCOMMIT => 1,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+        PDO::ATTR_EMULATE_PREPARES => true,
+        PDO::ATTR_STRINGIFY_FETCHES => false,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+    ],
+    
+
     /*
     |--------------------------------------------------------------------------
     | Migration Repository Table

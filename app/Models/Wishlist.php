@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Wishlist extends Model
 {
     use HasFactory;
-    public function product(){         
-        return $this->belongsTo(Product::class);   
+
+    public function product(){
+        return $this->belongsTo(Product::class)->with('productlangfrontend');
     }
-    public function author(){         
-        return $this->belongsTo(User::class);   
+
+    public function author(){
+        return $this->belongsTo(User::class);
     }
 }

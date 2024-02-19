@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+// namespace App\Http\Controllers\Api\Admin;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Ticket;
@@ -22,6 +26,7 @@ use Illuminate\Pagination\Paginator;
 
 class OrderController extends Controller
 {
+    
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -216,34 +221,127 @@ class OrderController extends Controller
         return view('admin.show_order',compact('order', 'setting'));
     }
 
-    public function updateOrderStatus(Request $request , $id){
-        $rules = [
-            'order_status' => 'required',
-            'payment_status' => 'required',
-        ];
-        $this->validate($request, $rules);
+    private function getProductIdForOrder(Order $order)
+{
+    // Assuming there is a relationship between orders and order items
+    \Log::info('Order ID: ' . $order->id);
 
-        $order = Order::find($id);
-        if($request->order_status == 0){
-            $order->order_status = 0;
-            $order->save();
-        }else if($request->order_status == 1){
-            $order->order_status = 1;
-            $order->save();
-        }
-
-        if($request->payment_status == 'pending'){
-            $order->payment_status = 'pending';
-            $order->save();
-        }elseif($request->payment_status == 'success'){
-            $order->payment_status = 'success';
-            $order->save();
-        }
-
-        $notification = trans('admin_validation.Order Status Updated successfully');
-        $notification = array('messege'=>$notification,'alert-type'=>'success');
-        return redirect()->back()->with($notification);
+    $orderItem = $order->orderItems->first();
+    
+    if ($orderItem) {
+        \Log::info('Order Item found. Product ID: ' . $orderItem->product_id);
+        return $orderItem->product_id;
     }
+    
+    \Log::info('No Order Item found.');
+    return null;
+}
+
+    
+
+
+
+
+
+
+
+
+
+public function updateOrderStatus(Request $request, $id)
+{
+    try {
+        // Start a database transaction
+        DB::beginTransaction();
+
+        // Retrieve the order with products
+        $order = Order::with('products')->find($id);
+
+        // Check if the order is null
+        if (!$order) {
+            // Rollback the transaction and return an error response
+            DB::rollBack();
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Retrieve the associated products
+        $products = $order->products;
+
+        // Update the order status first
+        $order->update(['order_status' => 1, 'payment_status' => 'success']);
+
+        // Debugging statement for order update
+        Log::debug('Order updated: ' . json_encode($order));
+
+        foreach ($products as $product) {
+            Log::debug('Inside product loop for order ' . $order->id);
+
+            // Update product payment status
+            $product->update(['payment_status' => 'success']);
+
+            // Debugging statement for product update
+            Log::debug('Product updated: ' . json_encode($product));
+
+            // Log product status before update
+            Log::debug('Product status before update: ' . $product->status);
+
+          // Check if the payment status is 'success' and update product status accordingly
+            if ($order->payment_status === 'success') {
+                Log::debug('Updating product status to 0...');
+                $product->status = 0;
+                $product->save(); // Save the model to persist the changes
+                // Log product status after update
+                Log::debug('Product status after update: ' . $product->status);
+                Log::debug('Product status updated: ' . json_encode($product));
+            } else {
+                Log::debug('Payment status is not success. No update to product status.');
+            }
+
+            Log::debug('Order payment status: ' . $order->payment_status);
+        }
+
+        // Commit the transaction
+        DB::commit();
+
+        // Return a success response
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        // Log any exception that occurs
+        Log::error('Error updating order status: ' . $e->getMessage());
+
+        // Rollback the transaction and return an error response
+        DB::rollBack();
+        return response()->json(['error' => 'An error occurred'], 500);
+    }
+}
+
+
+
+
+
+
+
+
+// public function updatePaymentStatus(Request $request, $orderId)
+// {
+//     $order = Order::findOrFail($orderId);
+
+//     // Update payment status
+//     $order->update(['payment_status' => $request->payment_status]);
+
+//     // Update product status based on payment status
+//     $product = $order->product;
+//     if ($request->payment_status == 'success') {
+//         $product->update(['status' => 0]); // Set status to inactive
+//     } elseif ($request->payment_status == 'pending') {
+//         $product->update(['status' => 1]); // Set status to active
+//     }
+
+//     // ... remaining code
+// }
+
+
+    
+
 
     public function destroy($id){
         $order = Order::find($id);

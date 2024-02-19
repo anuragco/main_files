@@ -89,6 +89,10 @@ use App\Http\Controllers\Provider\ProviderProfileController;
 use App\Http\Controllers\Provider\ProviderDashboardController;
 use App\Http\Controllers\Provider\AppointmentScheduleController;
 use App\Http\Controllers\Admin\Auth\AdminForgotPasswordController;
+use App\Http\Controllers\Api\User\PaypalController as APIPaypalController;
+use App\Http\Controllers\Api\SslCommerzPaymentController as APISslCommerzPaymentController;
+
+use App\Http\Controllers\Api\User\PaymentController as APIPaymentController;
 
 use App\Models\MultiCurrency;
 use App\Models\Setting;
@@ -176,6 +180,43 @@ Route::group(['middleware' => ['maintainance']], function () {
     Route::post('/cancel', [SslCommerzPaymentController::class, 'cancel']);
 
     Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
+
+
+    Route::group(['as'=> 'payment-api.', 'prefix' => 'payment-api'],function (){
+
+        Route::get('/webview-success-payment', [APIPaymentController::class, 'webview_success_payment'])->name('webview-success-payment');
+        Route::get('/webview-faild-payment', [APIPaymentController::class, 'webview_faild_payment'])->name('webview-faild-payment');
+
+        Route::get('/razorpay-webview/', [APIPaymentController::class, 'razorpay_webview'])->name('razorpay-webview');
+        Route::get('/razorpay-webview-payment', [APIPaymentController::class, 'razorpay_webview_payment'])->name('razorpay-webview-payment');
+
+        Route::get('/flutterwave-webview', [APIPaymentController::class, 'flutterwave_webview'])->name('flutterwave-webview');
+        Route::post('/flutterwave-webview-payment', [APIPaymentController::class, 'flutterwave_webview_payment'])->name('flutterwave-webview-payment');
+
+        Route::get('/mollie-webview', [APIPaymentController::class, 'mollie_webview'])->name('mollie-webview');
+        Route::get('/mollie-webview-payment', [APIPaymentController::class, 'mollie_webview_payment'])->name('mollie-webview-payment');
+
+        Route::get('/paystack-webview', [APIPaymentController::class, 'paystack_webview'])->name('paystack-webview');
+        Route::get('/paystack-webview-payment', [APIPaymentController::class, 'paystack_webview_payment'])->name('paystack-webview-payment');
+
+        Route::get('/instamojo-webview', [APIPaymentController::class, 'instamojo_webview'])->name('instamojo-webview');
+        Route::get('/instamojo-webview-payment', [APIPaymentController::class, 'instamojo_webview_payment'])->name('instamojo-webview-payment');
+
+
+        Route::get('/paypal-webview', [APIPaypalController::class, 'paypal_webview'])->name('paypal-webview');
+        Route::get('/paypal-webview-success', [APIPaypalController::class, 'paypal_webview_success'])->name('paypal-webview-success');
+
+        Route::get('/pay', [APISslCommerzPaymentController::class, 'index']);
+        Route::post('/pay-via-ajax', [APISslCommerzPaymentController::class, 'payViaAjax']);
+
+        Route::post('/success', [APISslCommerzPaymentController::class, 'success']);
+        Route::post('/fail', [APISslCommerzPaymentController::class, 'fail']);
+        Route::post('/cancel', [APISslCommerzPaymentController::class, 'cancel']);
+
+        Route::post('/ipn', [APISslCommerzPaymentController::class, 'ipn']);
+
+    });
+
     //SSLCOMMERZ END
     Route::get('/login', [LoginController::class, 'loginPage'])->name('login');
     Route::post('/store-login', [LoginController::class, 'storeLogin'])->name('store-login');
@@ -553,7 +594,7 @@ Route::get('/migrate', function(){
     Artisan::call('migrate');
 
     $setting = Setting::first();
-    $setting->app_version = '1.2';
+    $setting->app_version = '1.3';
     $setting->save();
 
     Artisan::call('optimize:clear');

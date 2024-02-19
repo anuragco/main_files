@@ -11,8 +11,22 @@ class Product extends Model
 {
     use HasFactory;
 
+    // Product.php
+
+    // Product.php
+
+// Product.php
+
+public function order()
+{
+    return $this->hasOne(Order::class, 'product_id', 'id');
+}
+
+
+    protected $fillable = ['is_available', /* other fields */];
+
     public function category(){
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id')->with('catlangfrontend');
     }
 
     public function author(){

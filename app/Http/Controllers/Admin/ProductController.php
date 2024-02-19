@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+// namespace App\Http\Controllers\Api\Admin;
+
 
 use File;
 use Image;
@@ -29,6 +31,25 @@ class ProductController extends Controller
     {
         $this->middleware('auth:admin');
     }
+
+    // ProductController.php
+
+    public function updateProductStatus(Request $request, $productId)
+    {
+        $product = Product::findOrFail($productId);
+
+        // Logic to update product status based on order status
+        if ($request->status == 1) {
+            // Update product status to active
+            $product->update(['status' => 1]);
+        } elseif ($request->status == 0) {
+            // Update product status to inactive
+            $product->update(['status' => 0]);
+        }
+
+        // ... remaining code
+    }
+
 
     public function index(Request $request){
         if($request->author_id){
